@@ -71,7 +71,7 @@
     /usr/sbin/postconf smtp_sasl_auth_enable=yes
     /usr/sbin/postconf smtp_sasl_password_maps=hash:/etc/postfix/sasl/passwd
     /usr/sbin/postconf smtp_sasl_security_options=noanonymous
-    /usr/sbin/postconf smtp_tls_CAfile=/etc/postfix/{{ ansible_nodename }}_ca.pem
+    /usr/sbin/postconf smtp_tls_CAfile=/etc/postfix/sasl/{{ ansible_nodename }}_ca.pem
     /usr/sbin/postconf smtp_use_tls=yes
   notify: postfix_mail_relay_service_handler
 
