@@ -1,38 +1,56 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+An Ansible Role to install and configure postfix, and configure postfix to use Google's SMTP service to relay mail for root, to a specified user.
+A self signed cert is created, and postfix is configured to use that certificate for SASL.
 
 Requirements
 ------------
+An Ansible vault to store username and password located in files/
+Required variables set in vars/main.yml
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
 
 Role Variables
 --------------
+target				- The remote target node.
+postfix_mail_relay  		- The hostname of the mail relay to be used.  I.E. smtp.gmail.com
+postfix_mail_relay_port 	- The port specification.  I.E. 587
+country				- The C value used during certificate creation
+state				- The ST value used during certificate creation
+local				- The L value used during certificate creation
+org				- The O value used during certificate creation
+ou				- The OU value used during certificate creation
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+--
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+- name: playbook to run postfix_mail_relay role
+  become: yes
+  become_flags: -H -S
+  hosts: "{{ target }}"
+  gather_facts: yes
+
+  vars_files:
+    - files/postfix_mail_relay_vault.yml
+    - vars/main.yml
+
+  roles:
+    - postfix_mail_relay
+
+
 
 License
 -------
-
-BSD
+GPL-2.0 and later
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+whitehat237@gmail.com
