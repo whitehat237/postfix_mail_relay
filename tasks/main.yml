@@ -28,12 +28,33 @@
     state: directory
     mode: '0750'
 
+#- name: check for existing uncommented alias line
+#  shell: egrep "^root:\s+" /etc/aliases
+#  register: existing_alias
+
+- name: check for desired, existing uncommented alias line
+  lineinfile:
+    dest: /etc/aliases
+    regexp: '^root:\s+{{ postfix_mail_relay_vault_username }}'
+    line: '^root:\s+{{ postfix_mail_relay_vault_username }}'
+  check_mode: yes
+  register: correct_alias
+  #failed_when: correct_alias.changed
+
+- name: remove existing undesired alias from /etc/aliases
+  lineinfile:
+    path: /etc/aliases
+    regexp: '^root:\s+'
+    state: absent
+  when: correct_alias.changed
+
 - name: configure root mail recipient
   lineinfile:
     path: /etc/aliases
-    line: "root: {{ postfix_mail_relay_vault_username }}"
-    regexp: "^#root:          marc"
+    line: 'root:           {{ postfix_mail_relay_vault_username }}'
+    regexp: '^#root:\s+marc'
     state: present
+  when: correct_alias.changed
   register: added_alias
 
 - name: update aliase DB
@@ -41,9 +62,9 @@
     newaliases
   when: added_alias.changed
 
-- name: create /etc/postfix/sasl directory 
+- name: create /etc/postfix/sasl directory
   file:
-    path: /etc/postfix/sasl 
+    path: /etc/postfix/sasl
     state: directory
     owner: root
     group: root
@@ -51,12 +72,12 @@
 
 - name: remove old /etc/postfix/sasl/passwd
   file:
-    path: /etc/postfix/sasl/passwd 
-    state: absent 
+    path: /etc/postfix/sasl/passwd
+    state: absent
 
 - name: create /etc/postfix/sasl/passwd
   file:
-    path: /etc/postfix/sasl/passwd 
+    path: /etc/postfix/sasl/passwd
     state: touch
     mode: 0400
 
