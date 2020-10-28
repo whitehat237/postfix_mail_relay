@@ -56,7 +56,7 @@
 - name: populate /etc/postfix/sasl/passwd file
   lineinfile:
     path: /etc/postfix/sasl/passwd
-    line: "[{{ postfix_mail_relay }}:{{ postfix_mail_relay_port }} {{ postfix_mail_relay_vault_username }}:{{ postfix_mail_relay_vault_password }}"
+    line: "[{{ postfix_mail_relay }}]:{{ postfix_mail_relay_port }} {{ postfix_mail_relay_vault_username }}:{{ postfix_mail_relay_vault_password }}"
     state: present
   notify: postfix_mail_relay_postmap_handler
 
