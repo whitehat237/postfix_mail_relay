@@ -1,6 +1,16 @@
 ---
 # tasks file for postfix_mail_relay
 
+- name: Assert required variables
+  assert:
+    that:
+      - postfix_mail_relay is defined
+      - postfix_mail_relay_port is defined
+      - country is defined
+      - state is defined
+      - local is defined
+      - org is defined
+      - ou is defined
 
 - name: install required packages
   yum:
