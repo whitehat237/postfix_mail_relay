@@ -7,7 +7,18 @@ A self signed cert is created, and postfix is configured to use that certificate
 Requirements
 ------------
 An Ansible vault to store username and password located in files/
-Required variables set in vars/main.yml
+
+I.E.
+$ ansible-vault create files/postfix_mail_relay_vault.yml
+
+Set a password for the vault.
+
+The vault should contain the following variables:
+
+postfix_mail_relay_vault_username: someuser@gmail.com
+postfix_mail_relay_vault_password: google-application-pa$$word1
+
+Required variables must set in vars/main.yml
 
 
 Role Variables
