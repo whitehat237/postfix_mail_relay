@@ -34,10 +34,12 @@
     line: "root: {{ postfix_mail_relay_vault_username }}"
     regexp: "^#root:          marc"
     state: present
+  register: added_alias
 
 - name: update aliase DB
   shell: |
     newaliases
+  when: added_alias.changed
 
 - name: create /etc/postfix/sasl directory 
   file:
@@ -46,6 +48,11 @@
     owner: root
     group: root
     mode: 0750
+
+- name: remove old /etc/postfix/sasl/passwd
+  file:
+    path: /etc/postfix/sasl/passwd 
+    state: absent 
 
 - name: create /etc/postfix/sasl/passwd
   file:
