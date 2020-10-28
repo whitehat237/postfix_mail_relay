@@ -1,8 +1,10 @@
 Role Name
 =========
 
-An Ansible Role to install and configure postfix, and configure postfix to use Google's SMTP service to relay mail for root, to a specified user.
-A self signed cert is created, and postfix is configured to use that certificate for SASL.
+An Ansible Role to install and configure postfix, and configure postfix to use 
+Google's SMTP service to relay mail for root, to a specified user.
+A self signed cert is created, and postfix is configured to use that 
+certificate for SASL.
 
 Requirements
 ------------
