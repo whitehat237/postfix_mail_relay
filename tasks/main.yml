@@ -95,7 +95,7 @@
 
 - name: set postfix configuration values
   shell: |
-    /usr/sbin/postconf relayhost="{{ postfix_mail_relay }}:{{ postfix_mail_relay_port }}"
+    /usr/sbin/postconf relayhost="[{{ postfix_mail_relay }}]:{{ postfix_mail_relay_port }}"
     /usr/sbin/postconf smtp_sasl_auth_enable=yes
     /usr/sbin/postconf smtp_sasl_password_maps=hash:/etc/postfix/sasl/passwd
     /usr/sbin/postconf smtp_sasl_security_options=noanonymous
