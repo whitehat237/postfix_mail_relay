@@ -1,0 +1,110 @@
+---
+# tasks file for postfix_mail_relay
+
+- name: Assert required variables
+  assert:
+    that:
+      - postfix_mail_relay is defined
+      - postfix_mail_relay_port is defined
+      - country is defined
+      - state is defined
+      - local is defined
+      - org is defined
+      - ou is defined
+
+- name: install required packages
+  yum:
+    name:
+      - postfix
+      - cyrus-sasl
+      - cyrus-sasl-plain
+      - cyrus-sasl-md5
+      - cyrus-sasl-lib
+    state: installed
+
+- name: create /etc/postfix/sasl dir
+  file:
+    path: /etc/postfix/sasl/
+    state: directory
+    mode: '0750'
+
+#- name: check for existing uncommented alias line
+#  shell: egrep "^root:\s+" /etc/aliases
+#  register: existing_alias
+
+- name: check for desired, existing uncommented alias line
+  lineinfile:
+    dest: /etc/aliases
+    regexp: '^root:\s+{{ postfix_mail_relay_vault_username }}'
+    line: '^root:\s+{{ postfix_mail_relay_vault_username }}'
+  check_mode: yes
+  register: correct_alias
+  #failed_when: correct_alias.changed
+
+- name: remove existing undesired alias from /etc/aliases
+  lineinfile:
+    path: /etc/aliases
+    regexp: '^root:\s+'
+    state: absent
+  when: correct_alias.changed
+
+- name: configure root mail recipient
+  lineinfile:
+    path: /etc/aliases
+    line: 'root:           {{ postfix_mail_relay_vault_username }}'
+    regexp: '^#root:\s+marc'
+    state: present
+  when: correct_alias.changed
+  register: added_alias
+
+- name: update aliase DB
+  shell: |
+    newaliases
+  when: added_alias.changed
+
+- name: create /etc/postfix/sasl directory
+  file:
+    path: /etc/postfix/sasl
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: remove old /etc/postfix/sasl/passwd
+  file:
+    path: /etc/postfix/sasl/passwd
+    state: absent
+
+- name: create /etc/postfix/sasl/passwd
+  file:
+    path: /etc/postfix/sasl/passwd
+    state: touch
+    mode: 0400
+
+- name: populate /etc/postfix/sasl/passwd file
+  lineinfile:
+    path: /etc/postfix/sasl/passwd
+    line: "[{{ postfix_mail_relay }}]:{{ postfix_mail_relay_port }} {{ postfix_mail_relay_vault_username }}:{{ postfix_mail_relay_vault_password }}"
+    state: present
+  notify: postfix_mail_relay_postmap_handler
+
+- name: create ca host certificate for postfix
+  shell: >-
+    /usr/bin/openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:4096 -keyout /etc/postfix/sasl/{{ ansible_nodename }}.key -out /etc/postfix/sasl/{{ ansible_nodename }}_ca.pem 
+    -subj "/C={{ country }}/ST={{ state }}/L={{ local }}/O={{ org }}/OU={{ ou }}/CN={{ ansible_nodename }}"
+
+- name: set postfix configuration values
+  shell: |
+    /usr/sbin/postconf relayhost="[{{ postfix_mail_relay }}]:{{ postfix_mail_relay_port }}"
+    /usr/sbin/postconf smtp_sasl_auth_enable=yes
+    /usr/sbin/postconf smtp_sasl_password_maps=hash:/etc/postfix/sasl/passwd
+    /usr/sbin/postconf smtp_sasl_security_options=noanonymous
+    /usr/sbin/postconf smtp_tls_CAfile=/etc/postfix/sasl/{{ ansible_nodename }}_ca.pem
+    /usr/sbin/postconf smtp_use_tls=yes
+  notify: postfix_mail_relay_service_handler
+
+- name: start and enable postfix
+  service:
+    name: postfix
+    state: started
+    enabled: yes

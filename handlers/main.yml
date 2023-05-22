@@ -1,0 +1,12 @@
+---
+# handlers file for postfix_mail_relay
+#
+- name: postfix_mail_relay_service_handler
+  service:
+    name: postfix
+    state: restarted
+
+- name: postfix_mail_relay_postmap_handler
+  shell: |
+    /usr/sbin/postmap /etc/postfix/sasl/passwd
+    chmod 400 /etc/postfix/sasl/passwd

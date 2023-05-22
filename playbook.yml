@@ -1,0 +1,13 @@
+---
+
+- name: playbook to run postfix_mail_relay role
+  become: yes
+  become_flags: -H -S
+  hosts: "{{ target }}"
+  gather_facts: yes
+
+  vars_files:
+    - files/postfix_mail_relay_vault.yml
+
+  roles:
+    - postfix_mail_relay

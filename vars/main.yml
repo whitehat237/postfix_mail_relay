@@ -1,0 +1,10 @@
+---
+# vars file for postfix_mail_relay
+#
+postfix_mail_relay: smtp.gmail.com
+postfix_mail_relay_port: 587
+country: US
+state: Alabama
+local: Huntsville
+org: myorg
+ou: Technology Division
